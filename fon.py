@@ -4,12 +4,21 @@ from tracker import *
 from threading import Thread
 
 
-def tracking(cap, fon, nom):
+def tracking(cap, nom):
     tracker = Tracker()
+    alpha = 0.999  # Коэффициент для фоновой обработки
+    FirstTime = True
     while True:
         ret, frame = cap.read()
     # Вычитание фона(кадр без людей) из кадра
         copy = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+    # Устанавливаем первый кадр как фон, после изменяем фон с ипользованием смешивания
+        if FirstTime:
+            fon = copy
+            FirstTime = False
+        else:
+            fon = cv2.addWeighted(copy, (1-alpha), fon, alpha, 0)
+    # вычитаем фон и текущий кадр
         dframe = cv2.absdiff(copy, fon)
         th, dframe = cv2.threshold(dframe, 35, 255, cv2.THRESH_BINARY)
     # Обнаружение контуров человека
@@ -45,8 +54,8 @@ camera1 = cv2.VideoCapture(
     "C:/Users/user/Desktop/st/3.Camera 2017-05-29 16-23-04_137 [3m3s].avi")
 camera2 = cv2.VideoCapture(
     "C:/Users/user/Desktop/st/4.Camera 2017-05-29 16-23-04_137 [3m3s].avi")
-Cam1 = Thread(target=tracking, args=(camera1, fon_3, 3))
-Cam2 = Thread(target=tracking, args=(camera2, fon_4, 4))
+Cam1 = Thread(target=tracking, args=(camera1, 3))
+Cam2 = Thread(target=tracking, args=(camera2, 4))
 Cam1.start()
 Cam2.start()
 cv2.destroyAllWindows()

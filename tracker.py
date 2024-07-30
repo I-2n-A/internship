@@ -12,6 +12,7 @@ class Tracker:
         self.distance_threshold = distance_threshold
         self.id_deckriptor = []
         self.deskriptors = []
+        self.last_id = 0
 
     def match(self, gray_cut):
         sift = cv2.SIFT_create()
@@ -42,6 +43,8 @@ class Tracker:
             self.deskriptors.append(descriptors_1)
             if self.id_deckriptor[len(self.id_deckriptor)-1] < self.id_count:
                 self.id_count = self.id_deckriptor[len(self.id_deckriptor)-1]
+            else:
+                self.last_id = self.id_count
             # return matches
         except:
             return 0
@@ -67,7 +70,7 @@ class Tracker:
             if same_object_detected is False:
                 self.center_points[self.id_count] = (cx, cy)
                 objects_bbs_ids.append([x, y, w, h, self.id_count])
-                self.id_count += 1
+                self.id_count = self.last_id + 1
                 self.id_deckriptor[len(self.id_deckriptor)-1] = self.id_count
         new_center_points = {}
         # обновление центра id
